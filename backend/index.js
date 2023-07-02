@@ -20,6 +20,8 @@ const commentRoutes = require("./routes/comments");
 const videoRoutes = require("./routes/videos");
 const cookieParser = require("cookie-parser");
 
+const BASE_URL = process.env.BASE_URL;
+
 dotenv.config();
 connectDB();
 const app = express();
@@ -68,7 +70,7 @@ const server = app.listen(
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "http://localhost:3000",
+    origin: `${BASE_URL}`,
   },
 });
 
