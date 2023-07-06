@@ -20,27 +20,9 @@ const commentRoutes = require("./routes/comments");
 const videoRoutes = require("./routes/videos");
 const cookieParser = require("cookie-parser");
 
-const BASE_URL = process.env.BASE_URL;
-
 dotenv.config();
 connectDB();
 const app = express();
-
-app.use("/images", express.static(path.join(__dirname, "/images")));
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "backend/images");
-  },
-  filename: (req, file, cb) => {
-    cb(null, req.body.name);
-  },
-});
-
-const upload = multer({ storage: storage });
-app.post("/api/upload", upload.single("file"), (req, res) => {
-  res.status(200).json("File has been uploaded");
-});
 
 app.use(cookieParser());
 
@@ -57,6 +39,24 @@ app.use("/api/blogusers", blogUserRoute);
 app.use("/api/blogposts", blogPostRoute);
 app.use("/api/blogpcat", blogCatRoute);
 
+// Deployment code for chat
+const __dirname1 = path.resolve();
+const pd = path.dirname(__dirname1);
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(pd, "/frontend/build")));
+
+  app.get("*", (req, res) =>
+    res.sendFile("https://virtual-workspace-jssstu.onrender.com")
+  );
+} else {
+  app.get("/", (req, res) => {
+    res.send("API is running..");
+  });
+}
+
+// Deployment end
+
 app.use(notFound);
 app.use(errorHandler);
 
@@ -70,7 +70,7 @@ const server = app.listen(
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: `${BASE_URL}`,
+    origin: "https://virtual-workspace-jssstu.onrender.com",
   },
 });
 
@@ -106,3 +106,5 @@ io.on("connection", (socket) => {
     socket.leave(userData._id);
   });
 });
+
+// Deoployment

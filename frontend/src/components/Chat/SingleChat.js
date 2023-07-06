@@ -15,11 +15,10 @@ import { getSender, getSenderFull } from "../../config/ChatLogics";
 import axios from "axios";
 import ScrollableChat from "./ScrollableChat";
 import io from "socket.io-client";
-import Lottie from "react-lottie"
+import Lottie from "react-lottie";
 import animationData from "../../animations/typing.json";
 
-
-const ENDPOINT = "http://localhost:5000";  //hosting sight
+const ENDPOINT = "https://virtual-workspace-jssstu.onrender.com"; //hosting sight  (important)
 var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
@@ -77,7 +76,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
   const sendMessage = async (event) => {
     if (event.key === "Enter" && newMessage) {
-         socket.emit("stop typing", selectedChat._id);
+      socket.emit("stop typing", selectedChat._id);
       try {
         const config = {
           headers: {
@@ -143,22 +142,22 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
 
-      if (!socketConnected) return;
+    if (!socketConnected) return;
 
-      if (!typing) {
-        setTyping(true);
-        socket.emit("typing", selectedChat._id);
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", selectedChat._id);
+    }
+    let lastTypingTime = new Date().getTime();
+    var timerLength = 3000;
+    setTimeout(() => {
+      var timeNow = new Date().getTime();
+      var timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit("stop typing", selectedChat._id);
+        setTyping(false);
       }
-      let lastTypingTime = new Date().getTime();
-      var timerLength = 3000;
-      setTimeout(() => {
-        var timeNow = new Date().getTime();
-        var timeDiff = timeNow - lastTypingTime;
-        if (timeDiff >= timerLength && typing) {
-          socket.emit("stop typing", selectedChat._id);
-          setTyping(false);
-        }
-      }, timerLength);
+    }, timerLength);
   };
 
   return (
